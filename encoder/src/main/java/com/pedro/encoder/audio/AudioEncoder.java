@@ -78,6 +78,11 @@ public class AudioEncoder extends BaseEncoder implements GetMicrophoneData {
       audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize);
       audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE,
           MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+      // DAF-6616: explicitly disable AAC SBR. Some chipsets implicitly enable SBR
+      // at high sample rate + bitrate (e.g. 48 kHz / 320 kbps), producing HE-AAC
+      // bitstream while the profile is declared as AAC LC. The mismatch causes
+      // viewer-side decoders (FLV/RTMP path) to render a black frame.
+      audioFormat.setInteger(MediaFormat.KEY_AAC_SBR_MODE, 0);
       codec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
       running = false;
       Log.i(TAG, "prepared");
